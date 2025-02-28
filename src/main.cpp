@@ -1,3 +1,4 @@
+#include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
@@ -8,7 +9,7 @@
 #include <iostream>
 
 int main(int, char **) {
-  
-
-  return 0;
-}
+  Game game; // Create an instance of the Game class
+  game.init(); // Initialize the game
+  game.run(); // Run the game
+  return 0; }
