@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "SceneMain.h"
 #include <SDL.h>
-#include <cstddef>
+#include <SDL_image.h>
 
 Game::Game() {}
 
@@ -46,8 +46,17 @@ void Game::init() {
     isRunning = false;
   }
 
+  // Initialize image
+  if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL_image: %s\n",
+                 IMG_GetError());
+    isRunning = false;
+  }
+
+
   // Initialize game scenes
   curScene = new SceneMain();
+  curScene->init();
 }
 
 // 定义Game类的clean成员函数，用于清理游戏资源
@@ -56,6 +65,9 @@ void Game::clean() {
     curScene->clean();
     delete curScene;
   }
+
+  // 清理SDL_image库
+  IMG_Quit();
 
   // 销毁渲染器，释放相关资源
   SDL_DestroyRenderer(renderer);

@@ -9,7 +9,8 @@
 #include <iostream>
 
 int main(int, char **) {
-  Game game; // Create an instance of the Game class
-  game.init(); // Initialize the game
-  game.run(); // Run the game
-  return 0; }
+  Game &game = Game::GetInstance(); // Create an instance of the Game class
+  game.init();                      // Initialize the game
+  game.run();                       // Run the game
+  return 0;
+}
