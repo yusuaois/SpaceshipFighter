@@ -2,6 +2,7 @@
 #include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_keyboard.h>
 #include <SDL_render.h>
 #include <cstddef>
 
@@ -19,7 +20,9 @@ void SceneMain::init() {
       (game.getWindowWidth() - player.width) / 2; // center the player
   player.position.y = game.getWindowHeight() - player.height;
 }
-void SceneMain::update() {}
+void SceneMain::update() {
+  keyBoardControl();
+}
 
 void SceneMain::render() {
   SDL_Rect playerRect = {static_cast<int>(player.position.x),
@@ -28,3 +31,19 @@ void SceneMain::render() {
   SDL_RenderCopy(game.getRenderer(), player.texture, NULL, &playerRect);
 }
 void SceneMain::clean() { SDL_DestroyTexture(player.texture); }
+
+void SceneMain::keyBoardControl(){
+  auto keyBoardState = SDL_GetKeyboardState(NULL);
+  if (keyBoardState[SDL_SCANCODE_W]&& player.position.y > 0) {
+    player.position.y -= 1;
+  }
+  if (keyBoardState[SDL_SCANCODE_S]&& player.position.y < game.getWindowHeight() - player.height) {
+    player.position.y += 1;
+  }
+  if (keyBoardState[SDL_SCANCODE_A]&& player.position.x > 0) {
+    player.position.x -= 1;
+  }
+  if (keyBoardState[SDL_SCANCODE_D]&& player.position.x < game.getWindowWidth() - player.width) {
+    player.position.x += 1;
+  }
+}

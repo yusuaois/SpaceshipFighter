@@ -19,6 +19,8 @@ public:
   void init() override;  // Called when the scene is entered
   void clean() override; // Called when the scene is exited
 
+  void keyBoardControl();
+
 private:
   Game &game;    // The game object
   Player player; // The player object
