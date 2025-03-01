@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Scene.h"
+#include <list>
 
 // 声明一个名为 Game 的类，但不提供其定义
 // 这种声明通常用于提前告知编译器该类的存在，以便在其他地方使用该类类型的变量或参数
@@ -20,10 +21,18 @@ public:
   void clean() override; // Called when the scene is exited
 
   void keyBoardControl(float deltaTime);
+  void shootPlayer();
+  void updateProjectiles(float deltaTime);
+  void renderProjectiles();
 
 private:
   Game &game;    // The game object
   Player player; // The player object
+  // 物体模板
+  ProjectilePlayer projectilePlayerTemplate;
+
+  std::list<ProjectilePlayer *>
+      ProjectilesPlayer; // The list of player projectiles
 };
 
 #endif // SCENE_MAIN_H
