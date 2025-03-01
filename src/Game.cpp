@@ -10,16 +10,24 @@ Game::~Game() { clean(); }
 // 定义Game类的run方法，用于运行游戏的主循环
 void Game::run() {
   while (isRunning) {
+    auto frameStart = SDL_GetTicks();
     SDL_Event event;
     handleEvent(&event);
-
-    update();
-
+    update(deltaTime);
     render();
+    auto frameDelay = SDL_GetTicks() - frameStart;
+    if (frameDelay < frameTime) {
+      SDL_Delay(frameTime - frameDelay);
+      deltaTime = frameTime/1000.0f; 
+    }
+    else{
+      deltaTime = frameDelay/1000.0f;
+    }
   }
 }
 
 void Game::init() {
+  frameTime = 1000/FPS;
   // Initialize SDL
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL: %s\n",
@@ -101,7 +109,7 @@ void Game::handleEvent(SDL_Event *event) {
   }
 }
 
-void Game::update() { curScene->update(); }
+void Game::update(float deltaTime) { curScene->update(deltaTime); }
 
 void Game::render() {
   SDL_RenderClear(renderer);

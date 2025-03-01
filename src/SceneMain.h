@@ -13,13 +13,13 @@ public:
   SceneMain();
   ~SceneMain();
 
-  void update() override;                      // Update the scene
+  void update(float deltaTime) override;       // Update the scene
   void render() override;                      // Render the scene
   void handleEvent(SDL_Event *event) override; // Handle events
   void init() override;  // Called when the scene is entered
   void clean() override; // Called when the scene is exited
 
-  void keyBoardControl();
+  void keyBoardControl(float deltaTime);
 
 private:
   Game &game;    // The game object

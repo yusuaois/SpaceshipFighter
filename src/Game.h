@@ -22,7 +22,7 @@ public:
   void changeScene(Scene *scene);
 
   void handleEvent(SDL_Event *event);
-  void update();
+  void update(float deltaTime);
   void render();
 
   SDL_Window *getWindow() { return window; }
@@ -45,6 +45,9 @@ private:
   SDL_Renderer *renderer = nullptr;
   int windowWidth = 600;
   int windowHeight = 800;
+  int FPS = 60;
+  Uint32 frameTime;
+  float deltaTime;
 };
 
 #endif

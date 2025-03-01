@@ -20,9 +20,7 @@ void SceneMain::init() {
       (game.getWindowWidth() - player.width) / 2; // center the player
   player.position.y = game.getWindowHeight() - player.height;
 }
-void SceneMain::update() {
-  keyBoardControl();
-}
+void SceneMain::update(float deltaTime) { keyBoardControl(deltaTime); }
 
 void SceneMain::render() {
   SDL_Rect playerRect = {static_cast<int>(player.position.x),
@@ -32,18 +30,20 @@ void SceneMain::render() {
 }
 void SceneMain::clean() { SDL_DestroyTexture(player.texture); }
 
-void SceneMain::keyBoardControl(){
+void SceneMain::keyBoardControl(float deltaTime) {
   auto keyBoardState = SDL_GetKeyboardState(NULL);
-  if (keyBoardState[SDL_SCANCODE_W]&& player.position.y > 0) {
-    player.position.y -= 1;
+  if (keyBoardState[SDL_SCANCODE_W] && player.position.y > 0) {
+    player.position.y -= deltaTime * player.speed;
   }
-  if (keyBoardState[SDL_SCANCODE_S]&& player.position.y < game.getWindowHeight() - player.height) {
-    player.position.y += 1;
+  if (keyBoardState[SDL_SCANCODE_S] &&
+      player.position.y < game.getWindowHeight() - player.height) {
+    player.position.y += deltaTime * player.speed;
   }
-  if (keyBoardState[SDL_SCANCODE_A]&& player.position.x > 0) {
-    player.position.x -= 1;
+  if (keyBoardState[SDL_SCANCODE_A] && player.position.x > 0) {
+    player.position.x -= deltaTime * player.speed;
   }
-  if (keyBoardState[SDL_SCANCODE_D]&& player.position.x < game.getWindowWidth() - player.width) {
-    player.position.x += 1;
+  if (keyBoardState[SDL_SCANCODE_D] &&
+      player.position.x < game.getWindowWidth() - player.width) {
+    player.position.x += deltaTime * player.speed;
   }
 }
