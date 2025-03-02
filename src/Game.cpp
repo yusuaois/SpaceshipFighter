@@ -18,16 +18,15 @@ void Game::run() {
     auto frameDelay = SDL_GetTicks() - frameStart;
     if (frameDelay < frameTime) {
       SDL_Delay(frameTime - frameDelay);
-      deltaTime = frameTime/1000.0f; 
-    }
-    else{
-      deltaTime = frameDelay/1000.0f;
+      deltaTime = frameTime / 1000.0f;
+    } else {
+      deltaTime = frameDelay / 1000.0f;
     }
   }
 }
 
 void Game::init() {
-  frameTime = 1000/FPS;
+  frameTime = 1000 / FPS;
   // Initialize SDL
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL: %s\n",
@@ -60,7 +59,6 @@ void Game::init() {
                  IMG_GetError());
     isRunning = false;
   }
-
 
   // Initialize game scenes
   curScene = new SceneMain();

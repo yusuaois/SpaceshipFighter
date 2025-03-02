@@ -1,18 +1,21 @@
 #include "SceneMain.h"
 #include "Game.h"
-#include "Object.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_keyboard.h>
-#include <SDL_rect.h>
-#include <SDL_render.h>
-#include <cstddef>
+#include <random>
 
 SceneMain::SceneMain() : game(Game::GetInstance()) {}
 
 SceneMain::~SceneMain() {}
+
 void SceneMain::handleEvent(SDL_Event *event) {}
+
 void SceneMain::init() {
+  // 随机数
+  std::random_device rd;
+  gen = std::mt19937(rd());
+  dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
+
   player.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/SpaceShip.png");
   SDL_QueryTexture(player.texture, NULL, NULL, &player.width, &player.height);
@@ -23,6 +26,7 @@ void SceneMain::init() {
   player.position.y = game.getWindowHeight() - player.height;
 
   // 初始化模板
+  // 玩家子弹
   projectilePlayerTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/laser-1.png");
   SDL_QueryTexture(projectilePlayerTemplate.texture, NULL, NULL,
@@ -30,10 +34,21 @@ void SceneMain::init() {
                    &projectilePlayerTemplate.height);
   projectilePlayerTemplate.width /= 4;
   projectilePlayerTemplate.height /= 4;
+  // 敌机
+  enemyTemplate.texture =
+      IMG_LoadTexture(game.getRenderer(), "assets/image/insect-2.png");
+  SDL_QueryTexture(enemyTemplate.texture, NULL, NULL, &enemyTemplate.width,
+                   &enemyTemplate.height);
+  enemyTemplate.width /= 4;
+  enemyTemplate.height /= 4;
 }
+
 void SceneMain::update(float deltaTime) {
   keyBoardControl(deltaTime);
   updateProjectiles(deltaTime);
+
+  spawnEnemies();
+  updateEnemies(deltaTime);
 }
 
 void SceneMain::render() {
@@ -44,20 +59,34 @@ void SceneMain::render() {
                          static_cast<int>(player.position.y), player.width,
                          player.height};
   SDL_RenderCopy(game.getRenderer(), player.texture, NULL, &playerRect);
+
+  // 渲染敌机
+  renderEnemies();
 }
 void SceneMain::clean() {
   // 清理容器
+  // 清理玩家子弹
   for (auto &projectile : ProjectilesPlayer) {
     if (projectile) {
       delete (projectile);
     }
   }
   ProjectilesPlayer.clear();
+  // 清理敌机
+  for (auto &enemy : Enemies) {
+    if (enemy) {
+      delete (enemy);
+    }
+  }
+  Enemies.clear();
+
   // 清理模板
   if (player.texture)
     SDL_DestroyTexture(player.texture);
   if (projectilePlayerTemplate.texture)
     SDL_DestroyTexture(projectilePlayerTemplate.texture);
+  if (enemyTemplate.texture)
+    SDL_DestroyTexture(enemyTemplate.texture);
 }
 
 void SceneMain::keyBoardControl(float deltaTime) {
@@ -116,5 +145,40 @@ void SceneMain::renderProjectiles() {
     };
     SDL_RenderCopy(game.getRenderer(), Projectile->texture, nullptr,
                    &projectileRect);
+  }
+}
+
+void SceneMain::spawnEnemies() {
+  if (dis(gen) > 1.0f / 60.0f)
+    return;
+
+  Enemy *enemy = new Enemy(enemyTemplate);
+  enemy->position.x = dis(gen) * (game.getWindowWidth() - enemy->width);
+  enemy->position.y = -enemy->height;
+  Enemies.push_back(enemy);
+}
+
+void SceneMain::updateEnemies(float deltaTime) {
+  for (auto it = Enemies.begin(); it != Enemies.end();) {
+    auto Enemy = *it;
+    Enemy->position.y += deltaTime * Enemy->speed;
+    if (Enemy->position.y > game.getWindowHeight()) {
+      delete Enemy;
+      it = Enemies.erase(it);
+    } else {
+      ++it;
+    }
+  }
+}
+
+void SceneMain::renderEnemies() {
+  for (auto Enemy : Enemies) {
+    SDL_Rect enemyRect = {
+        static_cast<int>(Enemy->position.x),
+        static_cast<int>(Enemy->position.y),
+        static_cast<int>(Enemy->width),
+        static_cast<int>(Enemy->height),
+    };
+    SDL_RenderCopy(game.getRenderer(), Enemy->texture, nullptr, &enemyRect);
   }
 }
