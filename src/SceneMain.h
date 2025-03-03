@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Scene.h"
+#include <SDL_rect.h>
 #include <list>
 #include <random>
 
@@ -28,6 +29,10 @@ public:
   void spawnEnemies();
   void updateEnemies(float deltaTime);
   void renderEnemies();
+  void shootEnemy(Enemy *enemy);
+  SDL_FPoint getDirectionVector(Enemy *enemy);
+  void updateEnemyProjectiles(float deltaTime);
+  void renderEnemyProjectiles();
 
 private:
   Game &game;                                // The game object
@@ -38,11 +43,14 @@ private:
   // 物体模板
   ProjectilePlayer projectilePlayerTemplate;
   Enemy enemyTemplate;
+  ProjectileEnemy projectileEnemyTemplate;
 
   // 物体列表
   std::list<ProjectilePlayer *>
       ProjectilesPlayer;      // The list of player projectiles
   std::list<Enemy *> Enemies; // The list of enemies
+  std::list<ProjectileEnemy *>
+      ProjectilesEnemies; // The list of enemy projectiles
 };
 
 #endif // SCENE_MAIN_H
