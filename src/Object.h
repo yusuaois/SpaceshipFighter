@@ -10,7 +10,7 @@ struct Player {
   int width = 0;
   int height = 0;
   int speed = 300;
-  int curHealth = 100;
+  int curHealth = 3;
   Uint32 coolDown = 500;
   Uint32 lastShotTime = 0;
 };

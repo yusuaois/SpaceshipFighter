@@ -56,6 +56,7 @@ void SceneMain::init() {
 }
 
 void SceneMain::update(float deltaTime) {
+
   keyBoardControl(deltaTime);
   updateProjectiles(deltaTime);
 
@@ -63,17 +64,19 @@ void SceneMain::update(float deltaTime) {
   updateEnemies(deltaTime);
 
   updateEnemyProjectiles(deltaTime);
+  updatePlayer(deltaTime);
 }
 
 void SceneMain::render() {
   // 渲染玩家子弹
   renderProjectiles();
   // 渲染玩家
-  SDL_Rect playerRect = {static_cast<int>(player.position.x),
-                         static_cast<int>(player.position.y), player.width,
-                         player.height};
-  SDL_RenderCopy(game.getRenderer(), player.texture, NULL, &playerRect);
-
+  if (!isDead) {
+    SDL_Rect playerRect = {static_cast<int>(player.position.x),
+                           static_cast<int>(player.position.y), player.width,
+                           player.height};
+    SDL_RenderCopy(game.getRenderer(), player.texture, NULL, &playerRect);
+  }
   // 渲染敌机
   renderEnemies();
   // 渲染敌机子弹
@@ -115,6 +118,8 @@ void SceneMain::clean() {
 }
 
 void SceneMain::keyBoardControl(float deltaTime) {
+  if (isDead)
+    return;
   auto keyBoardState = SDL_GetKeyboardState(NULL);
   if (keyBoardState[SDL_SCANCODE_W] && player.position.y > 0) {
     player.position.y -= deltaTime * player.speed;
@@ -144,6 +149,15 @@ void SceneMain::shootPlayer() {
       player.position.x + player.width / 2 - Projectile->width / 2;
   Projectile->position.y = player.position.y;
   ProjectilesPlayer.push_back(Projectile);
+}
+
+void SceneMain::updatePlayer(float deltaTime) {
+  if (isDead)
+    return;
+  if (player.curHealth<=0) {
+    // TODO gameover
+    isDead = true;
+  }
 }
 
 void SceneMain::updateProjectiles(float deltaTime) {
@@ -210,7 +224,7 @@ void SceneMain::updateEnemies(float deltaTime) {
       delete Enemy;
       it = Enemies.erase(it);
     } else {
-      if (curTime - Enemy->lastShotTime >= Enemy->coolDown) {
+      if (curTime - Enemy->lastShotTime >= Enemy->coolDown && !isDead) {
         shootEnemy(Enemy);
         Enemy->lastShotTime = curTime;
       }
@@ -272,7 +286,19 @@ void SceneMain::updateEnemyProjectiles(float deltaTime) {
       delete projectile;
       it = ProjectilesEnemies.erase(it);
     } else {
-      ++it;
+      SDL_Rect playerRect = {static_cast<int>(player.position.x),
+                             static_cast<int>(player.position.y), player.width,
+                             player.height};
+      SDL_Rect projectileRect = {static_cast<int>(projectile->position.x),
+                                 static_cast<int>(projectile->position.y),
+                                 projectile->width, projectile->height};
+      if (SDL_HasIntersection(&playerRect, &projectileRect) && !isDead) {
+        player.curHealth -= projectile->damage;
+        delete projectile;
+        it = ProjectilesEnemies.erase(it);
+      } else {
+        ++it;
+      }
     }
   }
 }

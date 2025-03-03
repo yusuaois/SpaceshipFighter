@@ -34,8 +34,10 @@ public:
   void updateEnemyProjectiles(float deltaTime);
   void renderEnemyProjectiles();
   void enemyExplode(Enemy *enemy);
+  void updatePlayer(float deltaTime);
 
 private:
+  bool isDead = false;
   Game &game;                                // The game object
   Player player;                             // The player object
   std::mt19937 gen;                          // Random number generator
