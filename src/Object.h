@@ -10,6 +10,7 @@ struct Player {
   int width = 0;
   int height = 0;
   int speed = 300;
+  int curHealth = 100;
   Uint32 coolDown = 500;
   Uint32 lastShotTime = 0;
 };
@@ -20,6 +21,7 @@ struct ProjectilePlayer {
   int width = 0;
   int height = 0;
   int speed = 400;
+  int damage = 1;
 };
 // 敌人
 struct Enemy {
@@ -28,6 +30,7 @@ struct Enemy {
   int width = 0;
   int height = 0;
   int speed = 200;
+  int curHealth = 2;
   Uint32 coolDown = 2000;
   Uint32 lastShotTime = 0;
 };
@@ -39,6 +42,7 @@ struct ProjectileEnemy {
   int width = 0;
   int height = 0;
   int speed = 400;
+  int damage = 1;
 };
 
 #endif

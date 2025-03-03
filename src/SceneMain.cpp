@@ -155,7 +155,25 @@ void SceneMain::updateProjectiles(float deltaTime) {
       delete Projectile;
       it = ProjectilesPlayer.erase(it);
     } else {
-      ++it;
+      bool hit = false;
+      for (auto Enemy : Enemies) {
+        SDL_Rect enemyRect = {static_cast<int>(Enemy->position.x),
+                              static_cast<int>(Enemy->position.y),
+                              (Enemy->width), (Enemy->height)};
+        SDL_Rect projectileRect = {static_cast<int>(Projectile->position.x),
+                                   static_cast<int>(Projectile->position.y),
+                                   (Projectile->width), (Projectile->height)};
+        if (SDL_HasIntersection(&projectileRect, &enemyRect)) {
+          Enemy->curHealth -= Projectile->damage;
+          delete Projectile;
+          it = ProjectilesPlayer.erase(it);
+          hit = true;
+          break;
+        }
+      }
+      if (!hit) {
+        ++it;
+      }
     }
   }
 }
@@ -196,7 +214,12 @@ void SceneMain::updateEnemies(float deltaTime) {
         shootEnemy(Enemy);
         Enemy->lastShotTime = curTime;
       }
-      ++it;
+      if (Enemy->curHealth <= 0) {
+        enemyExplode(Enemy);
+        it = Enemies.erase(it);
+      } else {
+        ++it;
+      }
     }
   }
 }
@@ -260,8 +283,11 @@ void SceneMain::renderEnemyProjectiles() {
                      static_cast<int>(projectile->position.y),
                      projectile->width, projectile->height};
     float angle =
-        atan2(projectile->direction.y, projectile->direction.x) * 180 / M_PI-90;
-    SDL_RenderCopyEx(game.getRenderer(), projectile->texture, nullptr, &rect, angle,
-                     nullptr, SDL_FLIP_NONE);
+        atan2(projectile->direction.y, projectile->direction.x) * 180 / M_PI -
+        90;
+    SDL_RenderCopyEx(game.getRenderer(), projectile->texture, nullptr, &rect,
+                     angle, nullptr, SDL_FLIP_NONE);
   }
 }
+
+void SceneMain::enemyExplode(Enemy *enemy) { delete enemy; }
