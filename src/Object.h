@@ -11,7 +11,7 @@ struct Player {
   int height = 0;
   int speed = 300;
   int curHealth = 3;
-  Uint32 coolDown = 500;
+  Uint32 coolDown = 300;
   Uint32 lastShotTime = 0;
 };
 // 玩家子弹
@@ -20,7 +20,7 @@ struct ProjectilePlayer {
   SDL_FPoint position = {0, 0};
   int width = 0;
   int height = 0;
-  int speed = 400;
+  int speed = 600;
   int damage = 1;
 };
 // 敌人
@@ -29,7 +29,7 @@ struct Enemy {
   SDL_FPoint position = {0, 0};
   int width = 0;
   int height = 0;
-  int speed = 200;
+  int speed = 150;
   int curHealth = 2;
   Uint32 coolDown = 2000;
   Uint32 lastShotTime = 0;
