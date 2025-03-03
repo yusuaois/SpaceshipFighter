@@ -154,12 +154,25 @@ void SceneMain::shootPlayer() {
 void SceneMain::updatePlayer(float deltaTime) {
   if (isDead)
     return;
-  if (player.curHealth<=0) {
+  if (player.curHealth <= 0) {
     // TODO gameover
     isDead = true;
   }
-}
+  for (auto enemy : Enemies) {
+    SDL_Rect enemyRect = {static_cast<int>(enemy->position.x),
+                          static_cast<int>(enemy->position.y), enemy->width,
+                          enemy->height};
 
+    SDL_Rect playerRect = {static_cast<int>(player.position.x),
+                          static_cast<int>(player.position.y), player.width,
+                          player.height};
+
+    if (SDL_HasIntersection(&enemyRect, &playerRect)) {
+      player.curHealth -= 1;
+      enemy->curHealth = 0;
+    }
+  }
+}
 void SceneMain::updateProjectiles(float deltaTime) {
   int margin = 32;
   for (auto it = ProjectilesPlayer.begin(); it != ProjectilesPlayer.end();) {
