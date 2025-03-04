@@ -35,7 +35,8 @@ public:
   void renderEnemyProjectiles();
   void enemyExplode(Enemy *enemy);
   void updatePlayer(float deltaTime);
-
+  void updateExplosions(float deltaTime);
+  void renderExplosions();
 private:
   bool isDead = false;
   Game &game;                                // The game object
@@ -47,6 +48,7 @@ private:
   ProjectilePlayer projectilePlayerTemplate;
   Enemy enemyTemplate;
   ProjectileEnemy projectileEnemyTemplate;
+  Explosion explosionTemplate;
 
   // 物体列表
   std::list<ProjectilePlayer *>
@@ -54,6 +56,7 @@ private:
   std::list<Enemy *> Enemies; // The list of enemies
   std::list<ProjectileEnemy *>
       ProjectilesEnemies; // The list of enemy projectiles
+  std::list<Explosion *> Explosions; // The list of explosions
 };
 
 #endif // SCENE_MAIN_H
