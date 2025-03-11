@@ -3,9 +3,12 @@
 #include "Object.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_log.h>
+#include <SDL_mixer.h>
 #include <SDL_rect.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
+#include <cstddef>
 #include <random>
 
 SceneMain::SceneMain() : game(Game::GetInstance()) {}
@@ -15,6 +18,22 @@ SceneMain::~SceneMain() {}
 void SceneMain::handleEvent(SDL_Event *event) {}
 
 void SceneMain::init() {
+  // 音乐
+  bgm = Mix_LoadMUS("assets/music/03_Racing_Through_Asteroids_Loop.ogg");
+  if (bgm == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load music: %s",
+                 Mix_GetError);
+  }
+  Mix_PlayMusic(bgm, -1);
+
+  // 读取音效资源
+  sounds["player_shoot"] = Mix_LoadWAV("assets/sound/laser_shoot4.wav");
+  sounds["enemy_shoot"] = Mix_LoadWAV("assets/sound/xs_laser.wav");
+  sounds["player_explosion"] = Mix_LoadWAV("assets/sound/explosion1.wav");
+  sounds["enemy_explosion"] = Mix_LoadWAV("assets/sound/explosion2.wav");
+  sounds["hit"] = Mix_LoadWAV("assets/sound/eff11.wav");
+  sounds["getItem"] = Mix_LoadWAV("assets/sound/eff5.wav");
+
   // 随机数
   std::random_device rd;
   gen = std::mt19937(rd());
@@ -107,6 +126,13 @@ void SceneMain::render() {
 }
 void SceneMain::clean() {
   // 清理容器
+  // 清理声音
+  for (auto sound : sounds) {
+    if (sound.second != nullptr) {
+      Mix_FreeChunk(sound.second);
+    }
+  }
+  sounds.clear();
   // 清理玩家子弹
   for (auto &projectile : ProjectilesPlayer) {
     if (projectile) {
@@ -155,6 +181,12 @@ void SceneMain::clean() {
     SDL_DestroyTexture(explosionTemplate.texture);
   if (itemLifeTemplate.texture)
     SDL_DestroyTexture(itemLifeTemplate.texture);
+
+  // 清理音乐
+  if (bgm != nullptr) {
+    Mix_HaltMusic();
+    Mix_FreeMusic(bgm);
+  }
 }
 
 void SceneMain::keyBoardControl(float deltaTime) {
@@ -189,6 +221,7 @@ void SceneMain::shootPlayer() {
       player.position.x + player.width / 2 - Projectile->width / 2;
   Projectile->position.y = player.position.y;
   ProjectilesPlayer.push_back(Projectile);
+  Mix_PlayChannel(0, sounds["player_shoot"], 0);
 }
 
 void SceneMain::updatePlayer(float) {
@@ -205,6 +238,7 @@ void SceneMain::updatePlayer(float) {
         player.position.y + player.height / 2 - explode->height / 2;
     explode->startTime = curTime;
     Explosions.push_back(explode);
+    Mix_PlayChannel(-1, sounds["player_explosion"], 0);
     return;
   }
   for (auto enemy : Enemies) {
@@ -243,6 +277,7 @@ void SceneMain::updateProjectiles(float deltaTime) {
           Enemy->curHealth -= Projectile->damage;
           delete Projectile;
           it = ProjectilesPlayer.erase(it);
+          Mix_PlayChannel(-1, sounds["hit"], 0);
           hit = true;
           break;
         }
@@ -320,6 +355,7 @@ void SceneMain::shootEnemy(Enemy *enemy) {
       enemy->position.y + enemy->height / 2 - projectile->height / 2;
   projectile->direction = getDirectionVector(enemy);
   ProjectilesEnemies.push_back(projectile);
+  Mix_PlayChannel(-1, sounds["enemy_shoot"], 0);
 }
 
 SDL_FPoint SceneMain::getDirectionVector(Enemy *enemy) {
@@ -358,6 +394,7 @@ void SceneMain::updateEnemyProjectiles(float deltaTime) {
         player.curHealth -= projectile->damage;
         delete projectile;
         it = ProjectilesEnemies.erase(it);
+        Mix_PlayChannel(-1, sounds["hit"], 0);
       } else {
         ++it;
       }
@@ -387,6 +424,7 @@ void SceneMain::enemyExplode(Enemy *enemy) {
       enemy->position.y + enemy->height / 2 - explosion->height / 2;
   explosion->startTime = curTime;
   Explosions.push_back(explosion);
+  Mix_PlayChannel(-1, sounds["enemy_explode"], 0);
   if (dis(gen) < 0.5f)
     dropItem(enemy);
   delete enemy;
@@ -467,7 +505,7 @@ void SceneMain::updateItems(float deltaTime) {
       SDL_Rect playerRect = {static_cast<int>(player.position.x),
                              static_cast<int>(player.position.y), player.width,
                              player.height};
-      if (SDL_HasIntersection(&itemRect, &playerRect)) {
+      if (SDL_HasIntersection(&itemRect, &playerRect) && isDead == false) {
         playerGetItem(item);
         delete item;
         it = Items.erase(it);
@@ -479,6 +517,7 @@ void SceneMain::updateItems(float deltaTime) {
 }
 
 void SceneMain::playerGetItem(Item *item) {
+  Mix_PlayChannel(-1, sounds["getItem"], 0);
   if (item->type == ItemType::Life && player.curHealth < player.maxHealth) {
     player.curHealth++;
   }

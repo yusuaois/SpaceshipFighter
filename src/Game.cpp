@@ -2,6 +2,8 @@
 #include "SceneMain.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 Game::Game() {}
 
@@ -60,6 +62,39 @@ void Game::init() {
     isRunning = false;
   }
 
+  // Initialize mixer
+  if (Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG) != (MIX_INIT_MP3 | MIX_INIT_OGG)) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL_mixer: %s\n",
+                 Mix_GetError());
+    isRunning = false;
+  }
+
+  // Initialize audio
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to open audio: %s\n",
+                 Mix_GetError());
+    isRunning = false;
+  }
+
+  Mix_AllocateChannels(32);
+
+  // volume
+  Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+  Mix_Volume(-1, MIX_MAX_VOLUME / 8);
+
+  // Initialize font
+  if (TTF_Init() == -1) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL_ttf: %s\n",
+                 TTF_GetError());
+    isRunning = false;
+  }
+
+  // Initialize game scenes
+  curScene = new SceneMain();
+  curScene->init();
+
+  // Initialize ttf
+
   // Initialize game scenes
   curScene = new SceneMain();
   curScene->init();
@@ -74,6 +109,10 @@ void Game::clean() {
 
   // 清理SDL_image库
   IMG_Quit();
+
+  // 清理SDL_mixer库
+  Mix_CloseAudio();
+  Mix_Quit();
 
   // 销毁渲染器，释放相关资源
   SDL_DestroyRenderer(renderer);
