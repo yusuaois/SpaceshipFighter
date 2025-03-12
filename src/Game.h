@@ -3,6 +3,7 @@
 
 #include "Scene.h"
 #include <SDL.h>
+#include "Object.h"
 
 // 单例模式：全局只有一个实例
 // 全局只有一个实例，并且只能通过instance()方法获取
@@ -29,6 +30,8 @@ public:
   SDL_Renderer *getRenderer() { return renderer; }
   int getWindowWidth() { return windowWidth; }
   int getWindowHeight() { return windowHeight; }
+  void backgroundUpdate(float deltaTime);
+  void renderBackground();
 
 private:
   Game();
@@ -48,6 +51,8 @@ private:
   int FPS = 60;
   Uint32 frameTime;
   float deltaTime;
+  Background nearStars;
+  Background farStars;
 };
 
 #endif

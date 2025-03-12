@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+#include <cstddef>
 
 Game::Game() {}
 
@@ -95,6 +96,20 @@ void Game::init() {
 
   // Initialize ttf
 
+  // Initialize Background
+  nearStars.texture = IMG_LoadTexture(renderer, "assets/image/Stars-A.png");
+  SDL_QueryTexture(nearStars.texture, NULL, NULL, &nearStars.width,
+                   &nearStars.height);
+  nearStars.width/=2;
+  nearStars.height/=2;
+
+  farStars.texture = IMG_LoadTexture(renderer, "assets/image/Stars-B.png");
+  SDL_QueryTexture(farStars.texture, NULL, NULL, &farStars.width,
+                   &farStars.height);
+  farStars.speed = 20;
+  farStars.width/=2;
+  farStars.height/=2;
+
   // Initialize game scenes
   curScene = new SceneMain();
   curScene->init();
@@ -105,6 +120,12 @@ void Game::clean() {
   if (curScene != nullptr) {
     curScene->clean();
     delete curScene;
+  }
+  if (nearStars.texture != nullptr) {
+    SDL_DestroyTexture(nearStars.texture);
+  }
+  if (farStars.texture != nullptr) {
+    SDL_DestroyTexture(farStars.texture);
   }
 
   // 清理SDL_image库
@@ -146,10 +167,52 @@ void Game::handleEvent(SDL_Event *event) {
   }
 }
 
-void Game::update(float deltaTime) { curScene->update(deltaTime); }
+void Game::update(float deltaTime) {
+  backgroundUpdate(deltaTime);
+  curScene->update(deltaTime);
+}
 
 void Game::render() {
+  // 清空
   SDL_RenderClear(renderer);
+
+  // 渲染背景
+  renderBackground();
+
   curScene->render();
+
+  // 显示更新
   SDL_RenderPresent(renderer);
+}
+
+void Game::backgroundUpdate(float deltaTime) {
+  nearStars.offset += nearStars.speed * deltaTime;
+  if (nearStars.offset >= 0) {
+    nearStars.offset -= nearStars.height;
+  }
+
+  farStars.offset += farStars.speed * deltaTime;
+  if (farStars.offset >= 0) {
+    farStars.offset -= farStars.height;
+  }
+}
+
+void Game::renderBackground() {
+
+  // 远处
+  
+  for (int posY = static_cast<int>(farStars.offset); posY < getWindowHeight(); posY += farStars.height) {
+    for (int posX = 0; posX < getWindowWidth(); posX += farStars.width) {
+      SDL_Rect dstRect = {posX, posY, farStars.width, farStars.height};
+      SDL_RenderCopy(renderer, farStars.texture, nullptr, &dstRect);
+    }
+  }
+  // 近处
+  
+  for (int posY = static_cast<int>(nearStars.offset); posY < getWindowHeight(); posY += nearStars.height) {
+    for (int posX = 0; posX < getWindowWidth(); posX += nearStars.width) {
+      SDL_Rect dstRect = {posX, posY, nearStars.width, nearStars.height};
+      SDL_RenderCopy(renderer, nearStars.texture, nullptr, &dstRect);
+    }
+  }
 }
