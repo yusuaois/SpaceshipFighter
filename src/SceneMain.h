@@ -6,6 +6,7 @@
 #include <SDL_mixer.h>
 #include <SDL_rect.h>
 #include <SDL_render.h>
+#include <SDL_ttf.h>
 #include <list>
 #include <map>
 #include <random>
@@ -54,6 +55,8 @@ private:
   std::uniform_real_distribution<float> dis; // Random number distribution
   Mix_Music *bgm;                            // Background music
   SDL_Texture *uiHealth;                     // UI health texture
+  TTF_Font *scoreFont;                       // Score font
+  int score = 0;                             // Score
 
   // 物体模板
   ProjectilePlayer projectilePlayerTemplate;

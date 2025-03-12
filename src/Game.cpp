@@ -94,8 +94,6 @@ void Game::init() {
   curScene = new SceneMain();
   curScene->init();
 
-  // Initialize ttf
-
   // Initialize Background
   nearStars.texture = IMG_LoadTexture(renderer, "assets/image/Stars-A.png");
   SDL_QueryTexture(nearStars.texture, NULL, NULL, &nearStars.width,
@@ -134,6 +132,9 @@ void Game::clean() {
   // 清理SDL_mixer库
   Mix_CloseAudio();
   Mix_Quit();
+
+  //清理SDL_ttf库
+  TTF_Quit();
 
   // 销毁渲染器，释放相关资源
   SDL_DestroyRenderer(renderer);

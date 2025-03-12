@@ -5,9 +5,11 @@
 #include <SDL_image.h>
 #include <SDL_log.h>
 #include <SDL_mixer.h>
+#include <SDL_pixels.h>
 #include <SDL_rect.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
+#include <SDL_ttf.h>
 #include <cstddef>
 #include <random>
 
@@ -26,8 +28,12 @@ void SceneMain::init() {
   }
   Mix_PlayMusic(bgm, -1);
 
-  //读取uiHealth
-  uiHealth = IMG_LoadTexture(game.getRenderer(), "assets/image/Health UI Black.png");
+  // 载入字体
+  scoreFont = TTF_OpenFont("assets/font/VonwaonBitmap-12px.ttf", 24);
+
+  // 读取uiHealth
+  uiHealth =
+      IMG_LoadTexture(game.getRenderer(), "assets/image/Health UI Black.png");
 
   // 读取音效资源
   sounds["player_shoot"] = Mix_LoadWAV("assets/sound/laser_shoot4.wav");
@@ -172,8 +178,8 @@ void SceneMain::clean() {
       delete (item);
     }
   }
-  //清理uiHealth
-  if(uiHealth!= nullptr){
+  // 清理uiHealth
+  if (uiHealth != nullptr) {
     SDL_DestroyTexture(uiHealth);
   }
 
@@ -195,6 +201,10 @@ void SceneMain::clean() {
   if (bgm != nullptr) {
     Mix_HaltMusic();
     Mix_FreeMusic(bgm);
+  }
+  // 清理字体
+  if (scoreFont != nullptr) {
+    TTF_CloseFont(scoreFont);
   }
 }
 
@@ -436,6 +446,7 @@ void SceneMain::enemyExplode(Enemy *enemy) {
   Mix_PlayChannel(-1, sounds["enemy_explode"], 0);
   if (dis(gen) < 0.5f)
     dropItem(enemy);
+  score += 10;
   delete enemy;
 }
 
@@ -526,6 +537,7 @@ void SceneMain::updateItems(float deltaTime) {
 }
 
 void SceneMain::playerGetItem(Item *item) {
+  score += 5;
   Mix_PlayChannel(-1, sounds["getItem"], 0);
   if (item->type == ItemType::Life && player.curHealth < player.maxHealth) {
     player.curHealth++;
@@ -541,19 +553,32 @@ void SceneMain::renderItems() {
   }
 }
 
-void SceneMain::renderUI(){
-  int x=10;
-  int y=10;
+void SceneMain::renderUI() {
+  // 渲染血条
+  int x = 10;
+  int y = 10;
   int size = 32;
   int offset = 40;
+
   SDL_SetTextureColorMod(uiHealth, 100, 100, 100);
-  for(int i=0; i<player.maxHealth; i++){
-    SDL_Rect rect = {x+i*offset,y,size,size};
+  for (int i = 0; i < player.maxHealth; i++) {
+    SDL_Rect rect = {x + i * offset, y, size, size};
     SDL_RenderCopy(game.getRenderer(), uiHealth, nullptr, &rect);
   }
-  SDL_SetTextureColorMod(uiHealth, 255,255,255);
-  for(int i=0; i<player.curHealth; i++){
-    SDL_Rect rect = {x+i*offset,y,size,size};
+  SDL_SetTextureColorMod(uiHealth, 255, 255, 255);
+  for (int i = 0; i < player.curHealth; i++) {
+    SDL_Rect rect = {x + i * offset, y, size, size};
     SDL_RenderCopy(game.getRenderer(), uiHealth, nullptr, &rect);
   }
+
+  // 渲染得分
+  auto text = "SCORE:" + std::to_string(score);
+  SDL_Color color = {255, 255, 255, 255};
+  SDL_Surface *surface = TTF_RenderUTF8_Solid(scoreFont, text.c_str(), color);
+  SDL_Texture *texture =
+      SDL_CreateTextureFromSurface(game.getRenderer(), surface);
+  SDL_Rect rect = {game.getWindowWidth() - surface->w - 10, 10, surface->w, surface->h};
+  SDL_RenderCopy(game.getRenderer(), texture, nullptr, &rect);
+  SDL_FreeSurface(surface);
+  SDL_DestroyTexture(texture);
 }
