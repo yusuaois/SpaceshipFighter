@@ -5,10 +5,10 @@
 #include "Scene.h"
 #include <SDL_mixer.h>
 #include <SDL_rect.h>
+#include <SDL_render.h>
 #include <list>
 #include <map>
 #include <random>
-
 
 // 声明一个名为 Game 的类，但不提供其定义
 // 这种声明通常用于提前告知编译器该类的存在，以便在其他地方使用该类类型的变量或参数
@@ -44,6 +44,7 @@ public:
   void updateItems(float deltaTime);
   void playerGetItem(Item *item);
   void renderItems();
+  void renderUI();
 
 private:
   bool isDead = false;
@@ -52,6 +53,7 @@ private:
   std::mt19937 gen;                          // Random number generator
   std::uniform_real_distribution<float> dis; // Random number distribution
   Mix_Music *bgm;                            // Background music
+  SDL_Texture *uiHealth;                     // UI health texture
 
   // 物体模板
   ProjectilePlayer projectilePlayerTemplate;
@@ -67,10 +69,10 @@ private:
       ProjectilesPlayer;      // The list of player projectiles
   std::list<Enemy *> Enemies; // The list of enemies
   std::list<ProjectileEnemy *>
-      ProjectilesEnemies;            // The list of enemy projectiles
-  std::list<Explosion *> Explosions; // The list of explosions
-  std::list<Item *> Items;           // The list of items
-  std::map<std::string, Mix_Chunk*> sounds; // The list of sounds
+      ProjectilesEnemies;                    // The list of enemy projectiles
+  std::list<Explosion *> Explosions;         // The list of explosions
+  std::list<Item *> Items;                   // The list of items
+  std::map<std::string, Mix_Chunk *> sounds; // The list of sounds
 };
 
 #endif // SCENE_MAIN_H
