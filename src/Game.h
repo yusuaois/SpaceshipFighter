@@ -1,9 +1,13 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "Object.h"
 #include "Scene.h"
 #include <SDL.h>
-#include "Object.h"
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <string>
+
 
 // 单例模式：全局只有一个实例
 // 全局只有一个实例，并且只能通过instance()方法获取
@@ -12,10 +16,12 @@
 
 class Game {
 public:
+  // 单例函数
   static Game &GetInstance() {
     static Game instance;
     return instance;
   };
+
   ~Game();
   void run();
   void init();
@@ -26,12 +32,17 @@ public:
   void update(float deltaTime);
   void render();
 
+  // 渲染文字函数
+  void renderTextCentered(std::string text, float posY,
+                          bool isTitle);
+
+  // setters
+
+  // getter
   SDL_Window *getWindow() { return window; }
   SDL_Renderer *getRenderer() { return renderer; }
   int getWindowWidth() { return windowWidth; }
   int getWindowHeight() { return windowHeight; }
-  void backgroundUpdate(float deltaTime);
-  void renderBackground();
 
 private:
   Game();
@@ -41,6 +52,9 @@ private:
   Game(const Game &) = delete;
   // 声明一个赋值运算符重载函数，并使用 delete 关键字禁用该函数
   // 这意味着禁止对该类的对象进行赋值操作
+
+  TTF_Font *titleFont;
+  TTF_Font *textFont;
 
   bool isRunning = true;
   Scene *curScene = nullptr;
@@ -53,6 +67,9 @@ private:
   float deltaTime;
   Background nearStars;
   Background farStars;
+
+  void backgroundUpdate(float deltaTime);
+  void renderBackground();
 };
 
 #endif

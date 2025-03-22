@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "SceneMain.h"
+#include "SceneTitle.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
@@ -90,26 +91,41 @@ void Game::init() {
     isRunning = false;
   }
 
-  // Initialize game scenes
-  curScene = new SceneMain();
-  curScene->init();
-
   // Initialize Background
   nearStars.texture = IMG_LoadTexture(renderer, "assets/image/Stars-A.png");
+  if (nearStars.texture == NULL) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to load texture: %s\n",
+                 IMG_GetError());
+    isRunning = false;
+  }
   SDL_QueryTexture(nearStars.texture, NULL, NULL, &nearStars.width,
                    &nearStars.height);
-  nearStars.width/=2;
-  nearStars.height/=2;
+  nearStars.width /= 2;
+  nearStars.height /= 2;
 
   farStars.texture = IMG_LoadTexture(renderer, "assets/image/Stars-B.png");
+  if (farStars.texture == NULL) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to load texture: %s\n",
+                 IMG_GetError());
+    isRunning = false;
+  }
   SDL_QueryTexture(farStars.texture, NULL, NULL, &farStars.width,
                    &farStars.height);
   farStars.speed = 20;
-  farStars.width/=2;
-  farStars.height/=2;
+  farStars.width /= 2;
+  farStars.height /= 2;
+
+  // 载入字体
+  titleFont = TTF_OpenFont("assets/font/VonwaonBitmap-16px.ttf", 64);
+  textFont = TTF_OpenFont("assets/font/VonwaonBitmap-16px.ttf", 32);
+  if (titleFont == nullptr || textFont == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to load font: %s\n",
+                 TTF_GetError());
+    isRunning = false;
+  }
 
   // Initialize game scenes
-  curScene = new SceneMain();
+  curScene = new SceneTitle();
   curScene->init();
 }
 
@@ -125,6 +141,12 @@ void Game::clean() {
   if (farStars.texture != nullptr) {
     SDL_DestroyTexture(farStars.texture);
   }
+  if (textFont != nullptr) {
+    TTF_CloseFont(textFont);
+  }
+  if (titleFont != nullptr) {
+    TTF_CloseFont(titleFont);
+  }
 
   // 清理SDL_image库
   IMG_Quit();
@@ -133,7 +155,7 @@ void Game::clean() {
   Mix_CloseAudio();
   Mix_Quit();
 
-  //清理SDL_ttf库
+  // 清理SDL_ttf库
   TTF_Quit();
 
   // 销毁渲染器，释放相关资源
@@ -186,6 +208,25 @@ void Game::render() {
   SDL_RenderPresent(renderer);
 }
 
+void Game::renderTextCentered(std::string text, float posY,
+                              bool isTitle) {
+
+  SDL_Color color = {255, 255, 255, 255};
+  SDL_Surface *surface;
+  if (isTitle) {
+    surface = TTF_RenderUTF8_Solid(titleFont, text.c_str(), color);
+  } else {
+    surface = TTF_RenderUTF8_Solid(textFont, text.c_str(), color);
+  }
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  int y = static_cast<int>((getWindowHeight() - surface->h) * posY);
+  SDL_Rect rect = {getWindowWidth() / 2 - surface->w / 2, y, surface->w,
+                   surface->h};
+  SDL_RenderCopy(renderer, texture, NULL, &rect);
+  SDL_DestroyTexture(texture);
+  SDL_FreeSurface(surface);
+}
+
 void Game::backgroundUpdate(float deltaTime) {
   nearStars.offset += nearStars.speed * deltaTime;
   if (nearStars.offset >= 0) {
@@ -201,16 +242,18 @@ void Game::backgroundUpdate(float deltaTime) {
 void Game::renderBackground() {
 
   // 远处
-  
-  for (int posY = static_cast<int>(farStars.offset); posY < getWindowHeight(); posY += farStars.height) {
+
+  for (int posY = static_cast<int>(farStars.offset); posY < getWindowHeight();
+       posY += farStars.height) {
     for (int posX = 0; posX < getWindowWidth(); posX += farStars.width) {
       SDL_Rect dstRect = {posX, posY, farStars.width, farStars.height};
       SDL_RenderCopy(renderer, farStars.texture, nullptr, &dstRect);
     }
   }
   // 近处
-  
-  for (int posY = static_cast<int>(nearStars.offset); posY < getWindowHeight(); posY += nearStars.height) {
+
+  for (int posY = static_cast<int>(nearStars.offset); posY < getWindowHeight();
+       posY += nearStars.height) {
     for (int posX = 0; posX < getWindowWidth(); posX += nearStars.width) {
       SDL_Rect dstRect = {posX, posY, nearStars.width, nearStars.height};
       SDL_RenderCopy(renderer, nearStars.texture, nullptr, &dstRect);

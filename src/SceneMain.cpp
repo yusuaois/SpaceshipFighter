@@ -1,23 +1,25 @@
 #include "SceneMain.h"
 #include "Game.h"
 #include "Object.h"
+#include "SceneTitle.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_log.h>
 #include <SDL_mixer.h>
-#include <SDL_pixels.h>
-#include <SDL_rect.h>
 #include <SDL_render.h>
-#include <SDL_timer.h>
 #include <SDL_ttf.h>
-#include <cstddef>
 #include <random>
 
-SceneMain::SceneMain() : game(Game::GetInstance()) {}
 
 SceneMain::~SceneMain() {}
 
-void SceneMain::handleEvent(SDL_Event *event) {}
+void SceneMain::handleEvent(SDL_Event *event) {
+  if (event->type == SDL_KEYDOWN) {
+    if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+      auto sceneTitle = new SceneTitle();
+      game.changeScene(sceneTitle);
+    }
+  }
+}
 
 void SceneMain::init() {
   // 音乐
@@ -577,7 +579,8 @@ void SceneMain::renderUI() {
   SDL_Surface *surface = TTF_RenderUTF8_Solid(scoreFont, text.c_str(), color);
   SDL_Texture *texture =
       SDL_CreateTextureFromSurface(game.getRenderer(), surface);
-  SDL_Rect rect = {game.getWindowWidth() - surface->w - 10, 10, surface->w, surface->h};
+  SDL_Rect rect = {game.getWindowWidth() - surface->w - 10, 10, surface->w,
+                   surface->h};
   SDL_RenderCopy(game.getRenderer(), texture, nullptr, &rect);
   SDL_FreeSurface(surface);
   SDL_DestroyTexture(texture);

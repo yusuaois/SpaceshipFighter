@@ -17,7 +17,6 @@ class Game;
 
 class SceneMain : public Scene {
 public:
-  SceneMain();
   ~SceneMain();
 
   void update(float deltaTime) override;       // Update the scene
@@ -26,30 +25,8 @@ public:
   void init() override;  // Called when the scene is entered
   void clean() override; // Called when the scene is exited
 
-  void keyBoardControl(float deltaTime);
-  void shootPlayer();
-  void updateProjectiles(float deltaTime);
-  void renderProjectiles();
-  void spawnEnemies();
-  void updateEnemies(float deltaTime);
-  void renderEnemies();
-  void shootEnemy(Enemy *enemy);
-  SDL_FPoint getDirectionVector(Enemy *enemy);
-  void updateEnemyProjectiles(float deltaTime);
-  void renderEnemyProjectiles();
-  void enemyExplode(Enemy *enemy);
-  void updatePlayer(float deltaTime);
-  void updateExplosions(float deltaTime);
-  void renderExplosions();
-  void dropItem(Enemy *enemy);
-  void updateItems(float deltaTime);
-  void playerGetItem(Item *item);
-  void renderItems();
-  void renderUI();
-
 private:
-  bool isDead = false;
-  Game &game;                                // The game object
+  bool isDead = false;                         // The game object
   Player player;                             // The player object
   std::mt19937 gen;                          // Random number generator
   std::uniform_real_distribution<float> dis; // Random number distribution
@@ -76,6 +53,32 @@ private:
   std::list<Explosion *> Explosions;         // The list of explosions
   std::list<Item *> Items;                   // The list of items
   std::map<std::string, Mix_Chunk *> sounds; // The list of sounds
+
+  // 渲染
+  void renderProjectiles();
+  void renderEnemies();
+  void renderItems();
+  void renderUI();
+  void renderEnemyProjectiles();
+  void renderExplosions();
+
+  // 更新
+  void spawnEnemies();
+  void updateEnemies(float deltaTime);
+  void updateProjectiles(float deltaTime);
+  void updateItems(float deltaTime);
+  void updatePlayer(float deltaTime);
+  void updateExplosions(float deltaTime);
+  void updateEnemyProjectiles(float deltaTime);
+  void keyBoardControl(float deltaTime);
+
+  // 其他
+  void dropItem(Enemy *enemy);
+  void playerGetItem(Item *item);
+  void shootPlayer();
+  void shootEnemy(Enemy *enemy);
+  SDL_FPoint getDirectionVector(Enemy *enemy);
+  void enemyExplode(Enemy *enemy);
 };
 
 #endif // SCENE_MAIN_H
