@@ -1,6 +1,7 @@
 #include "SceneMain.h"
 #include "Game.h"
 #include "Object.h"
+#include "SceneEnd.h"
 #include "SceneTitle.h"
 #include <SDL.h>
 #include <SDL_image.h>
@@ -114,6 +115,10 @@ void SceneMain::update(float deltaTime) {
   updateExplosions(deltaTime);
 
   updateItems(deltaTime);
+
+  if (isDead) {
+    changeSceneDelayed(deltaTime, 3);
+  }
 }
 
 void SceneMain::render() {
@@ -584,4 +589,12 @@ void SceneMain::renderUI() {
   SDL_RenderCopy(game.getRenderer(), texture, nullptr, &rect);
   SDL_FreeSurface(surface);
   SDL_DestroyTexture(texture);
+}
+
+void SceneMain::changeSceneDelayed(float deltaTime, float delay) {
+  timerEnd += deltaTime;
+  if (timerEnd >= delay) {
+    auto sceneEnd = new SceneEnd();
+    game.changeScene(sceneEnd);
+  }
 }

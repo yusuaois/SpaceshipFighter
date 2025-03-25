@@ -26,7 +26,7 @@ public:
   void clean() override; // Called when the scene is exited
 
 private:
-  bool isDead = false;                         // The game object
+  bool isDead = false;                       // The game object
   Player player;                             // The player object
   std::mt19937 gen;                          // Random number generator
   std::uniform_real_distribution<float> dis; // Random number distribution
@@ -34,6 +34,7 @@ private:
   SDL_Texture *uiHealth;                     // UI health texture
   TTF_Font *scoreFont;                       // Score font
   int score = 0;                             // Score
+  float timerEnd = 0.0f;                     // Timer for end of game
 
   // 物体模板
   ProjectilePlayer projectilePlayerTemplate;
@@ -71,6 +72,7 @@ private:
   void updateExplosions(float deltaTime);
   void updateEnemyProjectiles(float deltaTime);
   void keyBoardControl(float deltaTime);
+  void changeSceneDelayed(float deltaTime,float delay);
 
   // 其他
   void dropItem(Enemy *enemy);
@@ -79,6 +81,7 @@ private:
   void shootEnemy(Enemy *enemy);
   SDL_FPoint getDirectionVector(Enemy *enemy);
   void enemyExplode(Enemy *enemy);
+  
 };
 
 #endif // SCENE_MAIN_H
