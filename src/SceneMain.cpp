@@ -10,7 +10,6 @@
 #include <SDL_ttf.h>
 #include <random>
 
-
 SceneMain::~SceneMain() {}
 
 void SceneMain::handleEvent(SDL_Event *event) {
@@ -265,6 +264,7 @@ void SceneMain::updatePlayer(float) {
     explode->startTime = curTime;
     Explosions.push_back(explode);
     Mix_PlayChannel(-1, sounds["player_explosion"], 0);
+    game.setFinalScore(score);
     return;
   }
   for (auto enemy : Enemies) {

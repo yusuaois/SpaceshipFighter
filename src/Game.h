@@ -8,7 +8,6 @@
 #include <SDL_ttf.h>
 #include <string>
 
-
 // 单例模式：全局只有一个实例
 // 全局只有一个实例，并且只能通过instance()方法获取
 // 私有构造函数，防止外部创建实例
@@ -33,16 +32,17 @@ public:
   void render();
 
   // 渲染文字函数
-  void renderTextCentered(std::string text, float posY,
-                          bool isTitle);
+  void renderTextCentered(std::string text, float posY, bool isTitle);
 
   // setters
+  void setFinalScore(int score) { finalScore = score; }
 
   // getter
   SDL_Window *getWindow() { return window; }
   SDL_Renderer *getRenderer() { return renderer; }
   int getWindowWidth() { return windowWidth; }
   int getWindowHeight() { return windowHeight; }
+  int getFinalScore() { return finalScore; }
 
 private:
   Game();
@@ -65,6 +65,8 @@ private:
   int FPS = 60;
   Uint32 frameTime;
   float deltaTime;
+  int finalScore = 0;
+
   Background nearStars;
   Background farStars;
 
