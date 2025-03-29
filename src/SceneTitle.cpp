@@ -29,7 +29,12 @@ void SceneTitle::render() {
     game.renderTextCentered(normalText, 0.8, false);
   }
 };
-void SceneTitle::clean() {};
+void SceneTitle::clean() {
+    if(bgm!=nullptr){
+      Mix_HaltMusic();
+      Mix_FreeMusic(bgm);
+    }
+};
 void SceneTitle::handleEvent(SDL_Event *event) {
   if (event->type == SDL_KEYDOWN) {
     if (event->key.keysym.scancode == SDL_SCANCODE_J) {

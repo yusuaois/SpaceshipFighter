@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "SceneMain.h"
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <string>
 
 void SceneEnd::update(float deltaTime) {
@@ -10,6 +11,15 @@ void SceneEnd::update(float deltaTime) {
   }
 };
 void SceneEnd::init() {
+  // 载入背景音乐
+  bgm = Mix_LoadMUS("assets/music/06_Battle_in_Space_Intro.ogg");
+  if (!bgm) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to open audio: %s",
+                 SDL_GetError());
+  }
+  Mix_PlayMusic(bgm, -1);
+
+  // 载入字体
   if (!SDL_IsTextInputActive()) {
     SDL_StartTextInput();
   }
@@ -26,7 +36,12 @@ void SceneEnd::render() {
     renderPhase2();
   }
 };
-void SceneEnd::clean() {};
+void SceneEnd::clean() {
+  if(bgm!=nullptr){
+    Mix_HaltMusic();
+    Mix_FreeMusic(bgm);
+  }
+};
 
 void SceneEnd::handleEvent(SDL_Event *event) {
   if (isTyping) {

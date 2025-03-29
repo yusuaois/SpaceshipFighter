@@ -2,6 +2,7 @@
 #define SCENE_END_H
 
 #include "Scene.h"
+#include <SDL_mixer.h>
 #include <string>
 
 class SceneEnd : public Scene {
@@ -17,6 +18,7 @@ private:
   bool isTyping = true;
   std::string name = "";
   float blinkTimer = 1.0f;
+  Mix_Music *bgm = nullptr;
 
   void renderPhase1();
   void renderPhase2();

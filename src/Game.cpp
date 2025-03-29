@@ -6,16 +6,20 @@
 #include <SDL_log.h>
 #include <SDL_mixer.h>
 #include <SDL_pixels.h>
+#include <SDL_render.h>
+#include <SDL_scancode.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
+#include <SDL_video.h>
 #include <cstddef>
 #include <fstream>
 
 Game::Game() {}
 
-Game::~Game() { 
+Game::~Game() {
   saveScore();
-  clean(); }
+  clean();
+}
 
 // 定义Game类的run方法，用于运行游戏的主循环
 void Game::run() {
@@ -60,6 +64,23 @@ void Game::init() {
   if (renderer == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to create renderer: %s\n",
                  SDL_GetError());
+    isRunning = false;
+  }
+
+  // set logical resolution
+  SDL_RenderSetLogicalSize(renderer, windowWidth, windowHeight);
+
+  // Initialize text
+  if (TTF_Init() != 0) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL_ttf: %s\n",
+                 TTF_GetError());
+    isRunning = false;
+  }
+
+  // Initialize audio
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to initialize SDL_mixer: %s\n",
+                 Mix_GetError());
     isRunning = false;
   }
 
@@ -130,7 +151,7 @@ void Game::init() {
     isRunning = false;
   }
 
-  //载入得分
+  // 载入得分
   loadScore();
 
   // Initialize game scenes
@@ -191,9 +212,20 @@ void Game::changeScene(Scene *scene) {
 }
 
 void Game::handleEvent(SDL_Event *event) {
+
   while (SDL_PollEvent(event)) {
     if (event->type == SDL_QUIT) {
       isRunning = false;
+    }
+    if (event->type == SDL_KEYDOWN) {
+      if (event->key.keysym.sym == SDL_SCANCODE_F11) {
+        isFullScreen = !isFullScreen;
+        if (isFullScreen)
+          SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        else {
+          SDL_SetWindowFullscreen(window, 0);
+        }
+      }
     }
     curScene->handleEvent(event);
   }

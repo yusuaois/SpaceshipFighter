@@ -50,11 +50,12 @@ void SceneMain::init() {
   gen = std::mt19937(rd());
   dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
 
+  // 载入玩家
   player.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/SpaceShip.png");
   SDL_QueryTexture(player.texture, NULL, NULL, &player.width, &player.height);
-  player.width /= 4;
-  player.height /= 4;
+  player.width /= 5;
+  player.height /= 5;
   player.position.x =
       (game.getWindowWidth() - player.width) / 2; // center the player
   player.position.y = game.getWindowHeight() - player.height;
@@ -81,8 +82,8 @@ void SceneMain::init() {
   SDL_QueryTexture(projectileEnemyTemplate.texture, NULL, NULL,
                    &projectileEnemyTemplate.width,
                    &projectileEnemyTemplate.height);
-  projectileEnemyTemplate.width /= 4;
-  projectileEnemyTemplate.height /= 4;
+  projectileEnemyTemplate.width /= 2;
+  projectileEnemyTemplate.height /= 2;
   // 爆炸
   explosionTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/effect/explosion.png");
@@ -90,6 +91,7 @@ void SceneMain::init() {
                    &explosionTemplate.width, &explosionTemplate.height);
   explosionTemplate.totalFrame =
       explosionTemplate.width / explosionTemplate.height;
+  explosionTemplate.height *= 2;
   explosionTemplate.width = explosionTemplate.height;
   // 物品掉落
   itemLifeTemplate.texture =
@@ -484,8 +486,8 @@ void SceneMain::updateExplosions(float) {
 
 void SceneMain::renderExplosions() {
   for (auto explosion : Explosions) {
-    SDL_Rect src = {explosion->curFrame * explosion->width, 0, explosion->width,
-                    explosion->height};
+    SDL_Rect src = {explosion->curFrame * explosion->width, 0,
+                    explosion->width / 2, explosion->height / 2};
     SDL_Rect dst = {static_cast<int>(explosion->position.x),
                     static_cast<int>(explosion->position.y), explosion->width,
                     explosion->height};
