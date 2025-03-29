@@ -6,6 +6,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <map>
 #include <string>
 
 // 单例模式：全局只有一个实例
@@ -33,10 +34,11 @@ public:
 
   // 渲染文字函数
   SDL_Point renderTextCentered(std::string text, float posY, bool isTitle);
-  void renderTextPos(std::string text, int posX, int posY);
+  void renderTextPos(std::string text, int posX, int posY, bool isLeft = true);
 
   // setters
   void setFinalScore(int score) { finalScore = score; }
+  void insertScore(int score, std::string name);
 
   // getter
   SDL_Window *getWindow() { return window; }
@@ -44,6 +46,9 @@ public:
   int getWindowWidth() { return windowWidth; }
   int getWindowHeight() { return windowHeight; }
   int getFinalScore() { return finalScore; }
+  std::multimap<int, std::string, std::greater<int>> &getScoreBoard() {
+    return scoreBoard;
+  }
 
 private:
   Game();
@@ -70,6 +75,10 @@ private:
 
   Background nearStars;
   Background farStars;
+
+  // multimap 用于存储分数, 键为分数，值为玩家名,
+  // 按分数从大到小排序(std::greater<int>)
+  std::multimap<int, std::string, std::greater<int>> scoreBoard;
 
   void backgroundUpdate(float deltaTime);
   void renderBackground();

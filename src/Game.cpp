@@ -264,12 +264,25 @@ void Game::renderBackground() {
   }
 }
 
-void Game::renderTextPos(std::string text, int posX, int posY) {
+void Game::renderTextPos(std::string text, int posX, int posY, bool isLeft) {
   SDL_Color color = {255, 255, 255, 255};
   SDL_Surface *surface = TTF_RenderUTF8_Solid(textFont, text.c_str(), color);
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_Rect dstRect = {posX, posY, surface->w, surface->h};
+  SDL_Rect dstRect;
+  if (isLeft) {
+    dstRect = {posX, posY, surface->w, surface->h};
+  } else {
+    dstRect = {getWindowWidth() - posX - surface->w, posY, surface->w,
+               surface->h};
+  }
   SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
   SDL_DestroyTexture(texture);
   SDL_FreeSurface(surface);
+}
+
+void Game::insertScore(int score, std::string name) {
+  scoreBoard.insert({score, name});
+  if (scoreBoard.size() > 8) {
+    scoreBoard.erase(--scoreBoard.end());
+  }
 }

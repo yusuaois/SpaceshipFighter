@@ -1,8 +1,7 @@
 #include "SceneEnd.h"
 #include "Game.h"
-#include <SDL_events.h>
-#include <SDL_keyboard.h>
-#include <SDL_scancode.h>
+#include "SceneMain.h"
+#include <SDL.h>
 #include <string>
 
 void SceneEnd::update(float deltaTime) {
@@ -19,6 +18,7 @@ void SceneEnd::init() {
                  SDL_GetError());
   }
 };
+
 void SceneEnd::render() {
   if (isTyping) {
     renderPhase1();
@@ -27,6 +27,7 @@ void SceneEnd::render() {
   }
 };
 void SceneEnd::clean() {};
+
 void SceneEnd::handleEvent(SDL_Event *event) {
   if (isTyping) {
     if (event->type == SDL_TEXTINPUT) {
@@ -36,6 +37,10 @@ void SceneEnd::handleEvent(SDL_Event *event) {
       if (event->key.keysym.scancode == SDL_SCANCODE_RETURN) {
         isTyping = false;
         SDL_StopTextInput();
+        if (name == "") {
+          name = "无名氏";
+        }
+        game.insertScore(game.getFinalScore(), name);
       }
       if (event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
         removeLastUtf8Char(name);
@@ -43,6 +48,12 @@ void SceneEnd::handleEvent(SDL_Event *event) {
     }
 
   } else {
+    if (event->type == SDL_KEYDOWN) {
+      if (event->key.keysym.scancode == SDL_SCANCODE_J) {
+        Scene *scene = new SceneMain();
+        game.changeScene(scene);
+      }
+    }
   }
 };
 
@@ -72,7 +83,26 @@ void SceneEnd::renderPhase1() {
   }
 }
 
-void SceneEnd::renderPhase2() {}
+void SceneEnd::renderPhase2() {
+  // 渲染得分榜
+  game.renderTextCentered("得分榜", 0.1, true);
+  float posY = 0.2 * game.getWindowHeight();
+  int rank = 1;
+  for (auto item : game.getScoreBoard()) {
+    // 姓名
+    game.renderTextPos(std::to_string(rank) + ". " + item.second, 100, posY);
+    // 分数
+    game.renderTextPos(std::to_string(item.first), 100, posY, false);
+
+    rank++;
+    posY += 0.05 * game.getWindowHeight();
+  }
+
+  // 重新开始游戏
+  if (blinkTimer <= 0.5) {
+    game.renderTextCentered("按 J 键重新开始游戏", 0.85, false);
+  }
+}
 
 void SceneEnd::removeLastUtf8Char(std::string &str) {
   if (str.empty())
