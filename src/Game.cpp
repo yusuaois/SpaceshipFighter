@@ -3,15 +3,19 @@
 #include "SceneTitle.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_log.h>
 #include <SDL_mixer.h>
 #include <SDL_pixels.h>
 #include <SDL_surface.h>
 #include <SDL_ttf.h>
 #include <cstddef>
+#include <fstream>
 
 Game::Game() {}
 
-Game::~Game() { clean(); }
+Game::~Game() { 
+  saveScore();
+  clean(); }
 
 // 定义Game类的run方法，用于运行游戏的主循环
 void Game::run() {
@@ -125,6 +129,9 @@ void Game::init() {
                  TTF_GetError());
     isRunning = false;
   }
+
+  //载入得分
+  loadScore();
 
   // Initialize game scenes
   curScene = new SceneTitle();
@@ -284,5 +291,32 @@ void Game::insertScore(int score, std::string name) {
   scoreBoard.insert({score, name});
   if (scoreBoard.size() > 8) {
     scoreBoard.erase(--scoreBoard.end());
+  }
+}
+
+void Game::saveScore() {
+  // 保存得分榜
+  std::ofstream file("assets/save.dat");
+  if (!file.is_open()) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to open save file");
+    return;
+  }
+  for (auto it = scoreBoard.begin(); it != scoreBoard.end(); ++it) {
+    file << it->first << " " << it->second << std::endl;
+  }
+}
+
+void Game::loadScore() {
+  // 加载得分榜
+  std::ifstream file("assets/save.dat");
+  if (!file.is_open()) {
+    SDL_Log("Failed to open save file");
+    return;
+  }
+  scoreBoard.clear();
+  int score;
+  std::string name;
+  while (file >> score >> name) {
+    scoreBoard.insert({score, name});
   }
 }

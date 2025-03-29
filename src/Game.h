@@ -82,6 +82,8 @@ private:
 
   void backgroundUpdate(float deltaTime);
   void renderBackground();
+  void saveScore();
+  void loadScore();
 };
 
 #endif

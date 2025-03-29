@@ -85,7 +85,7 @@ void SceneEnd::renderPhase1() {
 
 void SceneEnd::renderPhase2() {
   // 渲染得分榜
-  game.renderTextCentered("得分榜", 0.1, true);
+  game.renderTextCentered("得分榜", 0.05, true);
   float posY = 0.2 * game.getWindowHeight();
   int rank = 1;
   for (auto item : game.getScoreBoard()) {
@@ -95,7 +95,7 @@ void SceneEnd::renderPhase2() {
     game.renderTextPos(std::to_string(item.first), 100, posY, false);
 
     rank++;
-    posY += 0.05 * game.getWindowHeight();
+    posY += 0.06 * game.getWindowHeight();
   }
 
   // 重新开始游戏
