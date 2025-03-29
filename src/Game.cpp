@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_pixels.h>
+#include <SDL_surface.h>
 #include <SDL_ttf.h>
 #include <cstddef>
 
@@ -208,8 +210,7 @@ void Game::render() {
   SDL_RenderPresent(renderer);
 }
 
-void Game::renderTextCentered(std::string text, float posY,
-                              bool isTitle) {
+SDL_Point Game::renderTextCentered(std::string text, float posY, bool isTitle) {
 
   SDL_Color color = {255, 255, 255, 255};
   SDL_Surface *surface;
@@ -225,6 +226,8 @@ void Game::renderTextCentered(std::string text, float posY,
   SDL_RenderCopy(renderer, texture, NULL, &rect);
   SDL_DestroyTexture(texture);
   SDL_FreeSurface(surface);
+
+  return {rect.x + rect.w, rect.y};
 }
 
 void Game::backgroundUpdate(float deltaTime) {
@@ -259,4 +262,14 @@ void Game::renderBackground() {
       SDL_RenderCopy(renderer, nearStars.texture, nullptr, &dstRect);
     }
   }
+}
+
+void Game::renderTextPos(std::string text, int posX, int posY) {
+  SDL_Color color = {255, 255, 255, 255};
+  SDL_Surface *surface = TTF_RenderUTF8_Solid(textFont, text.c_str(), color);
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_Rect dstRect = {posX, posY, surface->w, surface->h};
+  SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
+  SDL_DestroyTexture(texture);
+  SDL_FreeSurface(surface);
 }

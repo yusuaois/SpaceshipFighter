@@ -16,6 +16,8 @@ public:
 private:
   bool isTyping = true;
   std::string name = "";
+  float blinkTimer = 1.0f;
+
   void renderPhase1();
   void renderPhase2();
 

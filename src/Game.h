@@ -32,7 +32,8 @@ public:
   void render();
 
   // 渲染文字函数
-  void renderTextCentered(std::string text, float posY, bool isTitle);
+  SDL_Point renderTextCentered(std::string text, float posY, bool isTitle);
+  void renderTextPos(std::string text, int posX, int posY);
 
   // setters
   void setFinalScore(int score) { finalScore = score; }

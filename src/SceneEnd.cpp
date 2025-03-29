@@ -5,7 +5,11 @@
 #include <SDL_scancode.h>
 #include <string>
 
-void SceneEnd::update(float deltaTime) {};
+void SceneEnd::update(float deltaTime) {
+  if ((blinkTimer -= deltaTime) <= 0) {
+    blinkTimer += 1.0f;
+  }
+};
 void SceneEnd::init() {
   if (!SDL_IsTextInputActive()) {
     SDL_StartTextInput();
@@ -56,7 +60,15 @@ void SceneEnd::renderPhase1() {
 
   // 渲染输入框
   if (name != "") {
-    game.renderTextCentered(name, 0.8, false);
+    SDL_Point p = game.renderTextCentered(name, 0.8, false);
+    if (blinkTimer <= 0.5) {
+      game.renderTextPos("_", p.x, p.y);
+    }
+
+  } else {
+    if (blinkTimer <= 0.5) {
+      game.renderTextCentered("_", 0.8, false);
+    }
   }
 }
 
