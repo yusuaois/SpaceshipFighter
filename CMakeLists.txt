@@ -41,3 +41,8 @@ target_link_libraries(${TARGET}
                         SDL2_ttf::SDL2_ttf
                         SDL2_mixer::SDL2_mixer
                         )
+
+# 不弹出控制台窗口
+if (MSVC)
+    target_link_options(${TARGET} PRIVATE "/SUBSYSTEM:WINDOWS")
+endif()
