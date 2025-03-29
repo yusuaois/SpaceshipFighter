@@ -18,6 +18,8 @@ private:
   std::string name = "";
   void renderPhase1();
   void renderPhase2();
+
+  void removeLastUtf8Char(std::string &str);
 };
 
 #endif
