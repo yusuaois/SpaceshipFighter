@@ -2,7 +2,7 @@
 #define SCENE_END_H
 
 #include "Scene.h"
-#include <SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #include <string>
 
 class SceneEnd : public Scene {

@@ -1,8 +1,10 @@
 #include "SceneEnd.h"
 #include "Game.h"
 #include "SceneMain.h"
-#include <SDL.h>
-#include <SDL_mixer.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <string>
 
 void SceneEnd::update(float deltaTime) {
@@ -20,10 +22,10 @@ void SceneEnd::init() {
   Mix_PlayMusic(bgm, -1);
 
   // 载入字体
-  if (!SDL_IsTextInputActive()) {
-    SDL_StartTextInput();
+  if (!SDL_TextInputActive(game.getWindow())) {
+    SDL_StartTextInput(game.getWindow());
   }
-  if (!SDL_IsTextInputActive()) {
+  if (!SDL_TextInputActive(game.getWindow())) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to start text input: %s",
                  SDL_GetError());
   }
@@ -45,26 +47,26 @@ void SceneEnd::clean() {
 
 void SceneEnd::handleEvent(SDL_Event *event) {
   if (isTyping) {
-    if (event->type == SDL_TEXTINPUT) {
+    if (event->type == SDL_EVENT_TEXT_INPUT) {
       name += event->text.text;
     }
-    if (event->type == SDL_KEYDOWN) {
-      if (event->key.keysym.scancode == SDL_SCANCODE_RETURN) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+      if (event->key.scancode == SDL_SCANCODE_RETURN) {
         isTyping = false;
-        SDL_StopTextInput();
+        SDL_StopTextInput(game.getWindow());
         if (name == "") {
           name = "无名氏";
         }
         game.insertScore(game.getFinalScore(), name);
       }
-      if (event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
+      if (event->key.scancode == SDL_SCANCODE_BACKSPACE) {
         removeLastUtf8Char(name);
       }
     }
 
   } else {
-    if (event->type == SDL_KEYDOWN) {
-      if (event->key.keysym.scancode == SDL_SCANCODE_J) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+      if (event->key.scancode == SDL_SCANCODE_J) {
         Scene *scene = new SceneMain();
         game.changeScene(scene);
       }
@@ -86,7 +88,7 @@ void SceneEnd::renderPhase1() {
 
   // 渲染输入框
   if (name != "") {
-    SDL_Point p = game.renderTextCentered(name, 0.8, false);
+    SDL_FPoint p = game.renderTextCentered(name, 0.8, false);
     if (blinkTimer <= 0.5) {
       game.renderTextPos("_", p.x, p.y);
     }

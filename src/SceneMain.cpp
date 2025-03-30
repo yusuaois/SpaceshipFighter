@@ -3,18 +3,17 @@
 #include "Object.h"
 #include "SceneEnd.h"
 #include "SceneTitle.h"
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_mixer.h>
-#include <SDL_render.h>
-#include <SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <random>
 
 SceneMain::~SceneMain() {}
 
 void SceneMain::handleEvent(SDL_Event *event) {
-  if (event->type == SDL_KEYDOWN) {
-    if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+  if (event->type == SDL_EVENT_KEY_DOWN) {
+    if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
       auto sceneTitle = new SceneTitle();
       game.changeScene(sceneTitle);
     }
@@ -26,7 +25,7 @@ void SceneMain::init() {
   bgm = Mix_LoadMUS("assets/music/03_Racing_Through_Asteroids_Loop.ogg");
   if (bgm == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load music: %s",
-                 Mix_GetError);
+                 SDL_GetError);
   }
   Mix_PlayMusic(bgm, -1);
 
@@ -53,7 +52,7 @@ void SceneMain::init() {
   // 载入玩家
   player.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/SpaceShip.png");
-  SDL_QueryTexture(player.texture, NULL, NULL, &player.width, &player.height);
+  SDL_GetTextureSize(player.texture, &player.width, &player.height);
   player.width /= 5;
   player.height /= 5;
   player.position.x =
@@ -64,31 +63,31 @@ void SceneMain::init() {
   // 玩家子弹
   projectilePlayerTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/laser-1.png");
-  SDL_QueryTexture(projectilePlayerTemplate.texture, NULL, NULL,
-                   &projectilePlayerTemplate.width,
-                   &projectilePlayerTemplate.height);
+  SDL_GetTextureSize(projectilePlayerTemplate.texture,
+                     &projectilePlayerTemplate.width,
+                     &projectilePlayerTemplate.height);
   projectilePlayerTemplate.width /= 4;
   projectilePlayerTemplate.height /= 4;
   // 敌机
   enemyTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/insect-2.png");
-  SDL_QueryTexture(enemyTemplate.texture, NULL, NULL, &enemyTemplate.width,
-                   &enemyTemplate.height);
+  SDL_GetTextureSize(enemyTemplate.texture, &enemyTemplate.width,
+                     &enemyTemplate.height);
   enemyTemplate.width /= 4;
   enemyTemplate.height /= 4;
   // 敌机子弹
   projectileEnemyTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/bullet-1.png");
-  SDL_QueryTexture(projectileEnemyTemplate.texture, NULL, NULL,
-                   &projectileEnemyTemplate.width,
-                   &projectileEnemyTemplate.height);
+  SDL_GetTextureSize(projectileEnemyTemplate.texture,
+                     &projectileEnemyTemplate.width,
+                     &projectileEnemyTemplate.height);
   projectileEnemyTemplate.width /= 2;
   projectileEnemyTemplate.height /= 2;
   // 爆炸
   explosionTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/effect/explosion.png");
-  SDL_QueryTexture(explosionTemplate.texture, NULL, NULL,
-                   &explosionTemplate.width, &explosionTemplate.height);
+  SDL_GetTextureSize(explosionTemplate.texture, &explosionTemplate.width,
+                     &explosionTemplate.height);
   explosionTemplate.totalFrame =
       explosionTemplate.width / explosionTemplate.height;
   explosionTemplate.height *= 2;
@@ -96,8 +95,8 @@ void SceneMain::init() {
   // 物品掉落
   itemLifeTemplate.texture =
       IMG_LoadTexture(game.getRenderer(), "assets/image/bonus_life.png");
-  SDL_QueryTexture(itemLifeTemplate.texture, NULL, NULL,
-                   &itemLifeTemplate.width, &itemLifeTemplate.height);
+  SDL_GetTextureSize(itemLifeTemplate.texture, &itemLifeTemplate.width,
+                     &itemLifeTemplate.height);
   itemLifeTemplate.width /= 4;
   itemLifeTemplate.height /= 4;
 }
@@ -129,10 +128,9 @@ void SceneMain::render() {
   renderEnemyProjectiles();
   // 渲染玩家
   if (!isDead) {
-    SDL_Rect playerRect = {static_cast<int>(player.position.x),
-                           static_cast<int>(player.position.y), player.width,
-                           player.height};
-    SDL_RenderCopy(game.getRenderer(), player.texture, NULL, &playerRect);
+    SDL_FRect playerRect = {(player.position.x), (player.position.y),
+                            player.width, player.height};
+    SDL_RenderTexture(game.getRenderer(), player.texture, NULL, &playerRect);
   }
   // 渲染敌机
   renderEnemies();
@@ -271,14 +269,16 @@ void SceneMain::updatePlayer(float) {
   }
   for (auto enemy : Enemies) {
     SDL_Rect enemyRect = {static_cast<int>(enemy->position.x),
-                          static_cast<int>(enemy->position.y), enemy->width,
-                          enemy->height};
+                          static_cast<int>(enemy->position.y),
+                          static_cast<int>(enemy->width),
+                          static_cast<int>(enemy->height)};
 
     SDL_Rect playerRect = {static_cast<int>(player.position.x),
-                           static_cast<int>(player.position.y), player.width,
-                           player.height};
+                           static_cast<int>(player.position.y),
+                           static_cast<int>(player.width),
+                           static_cast<int>(player.height)};
 
-    if (SDL_HasIntersection(&enemyRect, &playerRect)) {
+    if (SDL_HasRectIntersection(&enemyRect, &playerRect)) {
       player.curHealth -= 1;
       enemy->curHealth = 0;
     }
@@ -297,11 +297,13 @@ void SceneMain::updateProjectiles(float deltaTime) {
       for (auto Enemy : Enemies) {
         SDL_Rect enemyRect = {static_cast<int>(Enemy->position.x),
                               static_cast<int>(Enemy->position.y),
-                              (Enemy->width), (Enemy->height)};
+                              static_cast<int>(Enemy->width),
+                              static_cast<int>(Enemy->height)};
         SDL_Rect projectileRect = {static_cast<int>(Projectile->position.x),
                                    static_cast<int>(Projectile->position.y),
-                                   (Projectile->width), (Projectile->height)};
-        if (SDL_HasIntersection(&projectileRect, &enemyRect)) {
+                                   static_cast<int>(Projectile->width),
+                                   static_cast<int>(Projectile->height)};
+        if (SDL_HasRectIntersection(&projectileRect, &enemyRect)) {
           Enemy->curHealth -= Projectile->damage;
           delete Projectile;
           it = ProjectilesPlayer.erase(it);
@@ -319,14 +321,14 @@ void SceneMain::updateProjectiles(float deltaTime) {
 
 void SceneMain::renderProjectiles() {
   for (auto Projectile : ProjectilesPlayer) {
-    SDL_Rect projectileRect = {
-        static_cast<int>(Projectile->position.x),
-        static_cast<int>(Projectile->position.y),
-        static_cast<int>(Projectile->width),
-        static_cast<int>(Projectile->height),
+    SDL_FRect projectileRect = {
+        (Projectile->position.x),
+        (Projectile->position.y),
+        (Projectile->width),
+        (Projectile->height),
     };
-    SDL_RenderCopy(game.getRenderer(), Projectile->texture, nullptr,
-                   &projectileRect);
+    SDL_RenderTexture(game.getRenderer(), Projectile->texture, nullptr,
+                      &projectileRect);
   }
 }
 
@@ -365,13 +367,13 @@ void SceneMain::updateEnemies(float deltaTime) {
 
 void SceneMain::renderEnemies() {
   for (auto Enemy : Enemies) {
-    SDL_Rect enemyRect = {
-        static_cast<int>(Enemy->position.x),
-        static_cast<int>(Enemy->position.y),
-        static_cast<int>(Enemy->width),
-        static_cast<int>(Enemy->height),
+    SDL_FRect enemyRect = {
+        (Enemy->position.x),
+        (Enemy->position.y),
+        (Enemy->width),
+        (Enemy->height),
     };
-    SDL_RenderCopy(game.getRenderer(), Enemy->texture, nullptr, &enemyRect);
+    SDL_RenderTexture(game.getRenderer(), Enemy->texture, nullptr, &enemyRect);
   }
 }
 
@@ -413,12 +415,14 @@ void SceneMain::updateEnemyProjectiles(float deltaTime) {
       it = ProjectilesEnemies.erase(it);
     } else {
       SDL_Rect playerRect = {static_cast<int>(player.position.x),
-                             static_cast<int>(player.position.y), player.width,
-                             player.height};
+                             static_cast<int>(player.position.y),
+                             static_cast<int>(player.width),
+                             static_cast<int>(player.height)};
       SDL_Rect projectileRect = {static_cast<int>(projectile->position.x),
                                  static_cast<int>(projectile->position.y),
-                                 projectile->width, projectile->height};
-      if (SDL_HasIntersection(&playerRect, &projectileRect) && !isDead) {
+                                 static_cast<int>(projectile->width),
+                                 static_cast<int>(projectile->height)};
+      if (SDL_HasRectIntersection(&playerRect, &projectileRect) && !isDead) {
         player.curHealth -= projectile->damage;
         delete projectile;
         it = ProjectilesEnemies.erase(it);
@@ -432,14 +436,13 @@ void SceneMain::updateEnemyProjectiles(float deltaTime) {
 
 void SceneMain::renderEnemyProjectiles() {
   for (auto projectile : ProjectilesEnemies) {
-    SDL_Rect rect = {static_cast<int>(projectile->position.x),
-                     static_cast<int>(projectile->position.y),
-                     projectile->width, projectile->height};
+    SDL_FRect rect = {(projectile->position.x), (projectile->position.y),
+                      projectile->width, projectile->height};
     float angle =
         atan2(projectile->direction.y, projectile->direction.x) * 180 / M_PI -
         90;
-    SDL_RenderCopyEx(game.getRenderer(), projectile->texture, nullptr, &rect,
-                     angle, nullptr, SDL_FLIP_NONE);
+    SDL_RenderTextureRotated(game.getRenderer(), projectile->texture, nullptr,
+                             &rect, angle, nullptr, SDL_FLIP_NONE);
   }
 }
 
@@ -486,12 +489,11 @@ void SceneMain::updateExplosions(float) {
 
 void SceneMain::renderExplosions() {
   for (auto explosion : Explosions) {
-    SDL_Rect src = {explosion->curFrame * explosion->width, 0,
-                    explosion->width / 2, explosion->height / 2};
-    SDL_Rect dst = {static_cast<int>(explosion->position.x),
-                    static_cast<int>(explosion->position.y), explosion->width,
-                    explosion->height};
-    SDL_RenderCopy(game.getRenderer(), explosion->texture, &src, &dst);
+    SDL_FRect src = {explosion->curFrame * explosion->width, 0,
+                     explosion->width / 2, explosion->height / 2};
+    SDL_FRect dst = {(explosion->position.x), (explosion->position.y),
+                     explosion->width, explosion->height};
+    SDL_RenderTexture(game.getRenderer(), explosion->texture, &src, &dst);
   }
 }
 
@@ -529,12 +531,14 @@ void SceneMain::updateItems(float deltaTime) {
       it = Items.erase(it);
     } else {
       SDL_Rect itemRect = {static_cast<int>(item->position.x),
-                           static_cast<int>(item->position.y), item->width,
-                           item->height};
+                           static_cast<int>(item->position.y),
+                           static_cast<int>(item->width),
+                           static_cast<int>(item->height)};
       SDL_Rect playerRect = {static_cast<int>(player.position.x),
-                             static_cast<int>(player.position.y), player.width,
-                             player.height};
-      if (SDL_HasIntersection(&itemRect, &playerRect) && isDead == false) {
+                             static_cast<int>(player.position.y),
+                             static_cast<int>(player.width),
+                             static_cast<int>(player.height)};
+      if (SDL_HasRectIntersection(&itemRect, &playerRect) && isDead == false) {
         playerGetItem(item);
         delete item;
         it = Items.erase(it);
@@ -555,41 +559,40 @@ void SceneMain::playerGetItem(Item *item) {
 
 void SceneMain::renderItems() {
   for (auto &item : Items) {
-    SDL_Rect itemRect = {static_cast<int>(item->position.x),
-                         static_cast<int>(item->position.y), item->width,
-                         item->height};
-    SDL_RenderCopy(game.getRenderer(), item->texture, nullptr, &itemRect);
+    SDL_FRect itemRect = {(item->position.x), (item->position.y), item->width,
+                          item->height};
+    SDL_RenderTexture(game.getRenderer(), item->texture, nullptr, &itemRect);
   }
 }
 
 void SceneMain::renderUI() {
   // 渲染血条
-  int x = 10;
-  int y = 10;
-  int size = 32;
+  float x = 10;
+  float y = 10;
+  float size = 32;
   int offset = 40;
 
   SDL_SetTextureColorMod(uiHealth, 100, 100, 100);
   for (int i = 0; i < player.maxHealth; i++) {
-    SDL_Rect rect = {x + i * offset, y, size, size};
-    SDL_RenderCopy(game.getRenderer(), uiHealth, nullptr, &rect);
+    SDL_FRect rect = {x + i * offset, y, size, size};
+    SDL_RenderTexture(game.getRenderer(), uiHealth, nullptr, &rect);
   }
   SDL_SetTextureColorMod(uiHealth, 255, 255, 255);
   for (int i = 0; i < player.curHealth; i++) {
-    SDL_Rect rect = {x + i * offset, y, size, size};
-    SDL_RenderCopy(game.getRenderer(), uiHealth, nullptr, &rect);
+    SDL_FRect rect = {x + i * offset, y, size, size};
+    SDL_RenderTexture(game.getRenderer(), uiHealth, nullptr, &rect);
   }
 
   // 渲染得分
   auto text = "SCORE:" + std::to_string(score);
   SDL_Color color = {255, 255, 255, 255};
-  SDL_Surface *surface = TTF_RenderUTF8_Solid(scoreFont, text.c_str(), color);
+  SDL_Surface *surface = TTF_RenderText_Solid(scoreFont, text.c_str(),0, color);
   SDL_Texture *texture =
       SDL_CreateTextureFromSurface(game.getRenderer(), surface);
-  SDL_Rect rect = {game.getWindowWidth() - surface->w - 10, 10, surface->w,
-                   surface->h};
-  SDL_RenderCopy(game.getRenderer(), texture, nullptr, &rect);
-  SDL_FreeSurface(surface);
+  SDL_FRect rect = {game.getWindowWidth() - surface->w - 10, 10, static_cast<float>(surface->w),
+    static_cast<float>(surface->h)};
+  SDL_RenderTexture(game.getRenderer(), texture, nullptr, &rect);
+  SDL_DestroySurface(surface);
   SDL_DestroyTexture(texture);
 }
 

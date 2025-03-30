@@ -1,8 +1,10 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <SDL_rect.h>
-#include <SDL_render.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 enum class ItemType {
   Life,
@@ -14,8 +16,8 @@ enum class ItemType {
 struct Player {
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 300;
   int curHealth = 3;
   int maxHealth = 3;
@@ -26,8 +28,8 @@ struct Player {
 struct ProjectilePlayer {
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 600;
   int damage = 1;
 };
@@ -35,8 +37,8 @@ struct ProjectilePlayer {
 struct Enemy {
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 150;
   int curHealth = 2;
   Uint32 coolDown = 2000;
@@ -47,8 +49,8 @@ struct ProjectileEnemy {
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
   SDL_FPoint direction = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 400;
   int damage = 1;
 };
@@ -56,8 +58,8 @@ struct ProjectileEnemy {
 struct Explosion {
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int curFrame = 0;
   int totalFrame = 0;
   Uint32 startTime = 0;
@@ -68,8 +70,8 @@ struct Item{
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
   SDL_FPoint direction = {0, 0};
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 150;
   int bounceCnt = 3;
   ItemType type = ItemType::Life;
@@ -79,8 +81,8 @@ struct Background{
   SDL_Texture *texture = nullptr;
   SDL_FPoint position = {0, 0};
   float offset = 0;
-  int width = 0;
-  int height = 0;
+  float width = 0;
+  float height = 0;
   int speed = 30;
 };
 
