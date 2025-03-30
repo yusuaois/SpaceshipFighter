@@ -1,1 +1,4 @@
-一个使用SDL2作为图形工具的2D打飞机游戏
+# SpaceShipFighter
+
+* This is a simple 2D space shooter game made with C++ & SDL2/SDL3.🚀
+
